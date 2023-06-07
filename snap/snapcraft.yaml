@@ -1,0 +1,52 @@
+name: halftone # you probably want to 'snapcraft register <name>'
+base: core22 # the base snap is the execution environment for this snap
+adopt-info: halftone
+grade: stable # must be 'stable' to release into candidate/stable channels
+confinement: strict # use 'strict' once you have the right plugs and slots
+
+parts:
+  magick:
+    source: https://github.com/ImageMagick/ImageMagick.git
+    source-commit: '920f79206ff59f30a4cff22c9c9c393508b82663'
+    plugin: autotools
+    autotools-configure-parameters:
+      - --prefix=/usr
+      - --with-heic=yes
+      - --with-rsvg=yes
+      - --disable-docs=yes
+  halftone:
+    after: [magick]
+    # See 'snapcraft plugins'
+    plugin: meson
+    source: https://github.com/tfuxu/Halftone.git
+    source-tag: '0.2.1'
+    meson-parameters:
+      - --prefix=/snap/halftone/current/usr
+    override-pull: |
+      craftctl default
+      patch -p1 < $CRAFT_PROJECT_DIR/halftone.patch
+      pip install --prefix=$CRAFT_PART_INSTALL/usr Wand==0.6.11
+    build-packages:
+      - blueprint-compiler
+    override-build: |
+      craftctl default
+      mkdir -p $CRAFT_PART_INSTALL/meta/gui
+      cp -r $CRAFT_PART_INSTALL/snap/halftone/current/usr/share/icons $CRAFT_PART_INSTALL/meta/gui/
+      for i in `find $CRAFT_PART_INSTALL/meta/gui/icons -name "*.svg" -o -name "*.png"`; do
+        mv $i "`dirname $i`/snap.$CRAFT_PROJECT_NAME.`basename $i`"
+      done
+      sed -e '1c#!/usr/bin/python3' -i $CRAFT_PART_INSTALL/usr/local/bin/*
+    parse-info: [usr/share/appdata/io.github.tfuxu.Halftone.appdata.xml]
+    organize:
+      snap/halftone/current: .
+      usr/local: usr
+      
+apps:
+  halftone:
+    command: usr/bin/halftone
+    common-id: io.github.tfuxu.Halftone
+    extensions: [gnome]
+    environment:
+      PYTHONPATH: $SNAP/usr/lib/python3.10/dist-packages:$PYTHONPATH
+    
+      
