@@ -1,0 +1,23 @@
+diff -Naur a/data/io.github.tfuxu.Halftone.appdata.xml.in.in b/data/io.github.tfuxu.Halftone.appdata.xml.in.in
+--- a/data/io.github.tfuxu.Halftone.appdata.xml.in.in	2023-06-08 04:26:49.750193494 +0530
++++ b/data/io.github.tfuxu.Halftone.appdata.xml.in.in	2023-06-08 04:30:33.885829765 +0530
+@@ -1,6 +1,7 @@
+ <?xml version='1.0' encoding='utf-8'?>
+ <component type="desktop-application">
+   <id>@APP_ID@</id>
++  	<icon type="stock">snap.halftone.@APP_ID@</icon>
+   <name>Halftone</name>
+   <summary>Give your images that pixel art-like style</summary>
+   <developer_name>tfuxu</developer_name>
+diff -Naur a/data/io.github.tfuxu.Halftone.desktop.in.in b/data/io.github.tfuxu.Halftone.desktop.in.in
+--- a/data/io.github.tfuxu.Halftone.desktop.in.in	2023-06-08 04:26:28.965980408 +0530
++++ b/data/io.github.tfuxu.Halftone.desktop.in.in	2023-06-08 04:30:44.885448818 +0530
+@@ -7,7 +7,7 @@
+ Name=Halftone
+ Comment=Give your images that pixel art-like style
+ Categories=GTK;Graphics;
+-Icon=@APP_ID@
++Icon=snap.halftone.@APP_ID@
+ # Translators: These are search terms to find this application. Do NOT translate or localize the semicolons. The list MUST also end with a semicolon.
+ Keywords=image;graphics;compression;
+ # Translators: Do NOT translate or transliterate this text (these are enum types)!
