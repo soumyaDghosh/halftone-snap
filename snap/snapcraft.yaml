@@ -1,6 +1,7 @@
 name: halftone # you probably want to 'snapcraft register <name>'
 base: core22 # the base snap is the execution environment for this snap
 adopt-info: halftone
+version: '0.2.0'
 grade: stable # must be 'stable' to release into candidate/stable channels
 confinement: strict # use 'strict' once you have the right plugs and slots
 
@@ -27,6 +28,7 @@ parts:
     source-tag: '0.2.1'
     meson-parameters:
       - --prefix=/snap/halftone/current/usr
+      - -Dbuildtype=release
     override-pull: |
       craftctl default
       patch -p1 < $CRAFT_PROJECT_DIR/halftone.patch
