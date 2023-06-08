@@ -5,23 +5,8 @@ version: '0.2.0'
 grade: stable # must be 'stable' to release into candidate/stable channels
 confinement: strict # use 'strict' once you have the right plugs and slots
 
-parts:
-  magick:
-    source: https://github.com/ImageMagick/ImageMagick.git
-    source-commit: '920f79206ff59f30a4cff22c9c9c393508b82663'
-    plugin: autotools
-    autotools-configure-parameters:
-      - --prefix=/usr
-      - --with-heic=yes
-      - --with-rsvg=yes
-      - --disable-docs
-    prime:
-      - -usr/lib/pkgconfig
-      - -usr/share/docs
-      - -usr/share/pkgconfig
-      
+parts:      
   halftone:
-    after: [magick]
     # See 'snapcraft plugins'
     plugin: meson
     source: https://github.com/tfuxu/Halftone.git
@@ -35,6 +20,8 @@ parts:
       pip install --prefix=$CRAFT_PART_INSTALL/usr Wand==0.6.11
     build-packages:
       - blueprint-compiler
+    stage-packages:
+      - libmagickwand-6.q16-6
     override-build: |
       craftctl default
       mkdir -p $CRAFT_PART_INSTALL/meta/gui
@@ -46,7 +33,8 @@ parts:
     organize:
       snap/halftone/current: .
       usr/local: usr
-      
+    prime:
+      - -usr/share/doc
 apps:
   halftone:
     command: usr/bin/halftone
