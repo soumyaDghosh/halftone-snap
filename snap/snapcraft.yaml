@@ -29,12 +29,22 @@ parts:
       for i in `find $CRAFT_PART_INSTALL/meta/gui/icons -name "*.svg" -o -name "*.png"`; do
         mv $i "`dirname $i`/snap.$CRAFT_PROJECT_NAME.`basename $i`"
       done
+    override-prime: |
+      craftctl default
+      if [ "$CRAFT_ARCH_TRIPLET" = "arm-linux-gnueabihf" ]; then
+      execstack --clear-execstack usr/lib/arm-linux-gnueabihf/libde265.so.0.1.1
+      fi
     parse-info: [usr/share/appdata/io.github.tfuxu.Halftone.appdata.xml]
     organize:
       snap/halftone/current: .
       usr/local: usr
     prime:
       - -usr/share/doc
+slots:
+  halftone:
+    interface: dbus
+    bus: session
+    name: io.github.tfuxu.Halftone
 apps:
   halftone:
     command: usr/bin/halftone
