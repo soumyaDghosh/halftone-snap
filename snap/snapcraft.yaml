@@ -14,6 +14,11 @@ parts:
       - --with-heic=yes
       - --with-rsvg=yes
       - --disable-docs
+    prime:
+      - -usr/lib/pkgconfig
+      - -usr/share/docs
+      - -usr/share/pkgconfig
+      
   halftone:
     after: [magick]
     # See 'snapcraft plugins'
@@ -35,7 +40,6 @@ parts:
       for i in `find $CRAFT_PART_INSTALL/meta/gui/icons -name "*.svg" -o -name "*.png"`; do
         mv $i "`dirname $i`/snap.$CRAFT_PROJECT_NAME.`basename $i`"
       done
-      sed -e '1c#!/usr/bin/python3' -i $CRAFT_PART_INSTALL/usr/local/bin/*
     parse-info: [usr/share/appdata/io.github.tfuxu.Halftone.appdata.xml]
     organize:
       snap/halftone/current: .
