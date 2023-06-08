@@ -52,5 +52,7 @@ apps:
     extensions: [gnome]
     environment:
       PYTHONPATH: $SNAP/usr/lib/python3.10/dist-packages:$PYTHONPATH
+    plugs:
+      - home
     
       
