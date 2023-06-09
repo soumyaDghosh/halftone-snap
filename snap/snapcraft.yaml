@@ -18,6 +18,7 @@ parts:
       craftctl default
       patch -p1 < $CRAFT_PROJECT_DIR/halftone.patch
       pip install --prefix=$CRAFT_PART_INSTALL/usr Wand==0.6.11
+      pip install --prefix=$CRAFT_PART_INSTALL/usr libtiff
     build-packages:
       - blueprint-compiler
     stage-packages:
