@@ -18,12 +18,13 @@ parts:
       craftctl default
       patch -p1 < $CRAFT_PROJECT_DIR/halftone.patch
       pip install --prefix=$CRAFT_PART_INSTALL/usr Wand==0.6.11
-      pip install --prefix=$CRAFT_PART_INSTALL/usr libtiff
     build-packages:
       - blueprint-compiler
+      - execstack
     stage-packages:
       - libmagickwand-6.q16-6
       - libtiff5
+      - python3-libtiff
     override-build: |
       craftctl default
       mkdir -p $CRAFT_PART_INSTALL/meta/gui
@@ -40,6 +41,7 @@ parts:
     organize:
       snap/halftone/current: .
       usr/local: usr
+      usr/lib/python3: usr/lib/python3.10
     prime:
       - -usr/share/doc
 slots:
