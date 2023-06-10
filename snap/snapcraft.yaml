@@ -16,6 +16,7 @@ parts:
       - --with-rsvg=yes 
       - --with-modules=yes
       - --enable-delegate-build=yes
+      - --with-png=yes
     prime:
       - -usr/lib/pkgconfig
       - -usr/include
