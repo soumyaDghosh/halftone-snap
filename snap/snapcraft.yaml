@@ -1,63 +1,133 @@
-name: halftone # you probably want to 'snapcraft register <name>'
-base: core22 # the base snap is the execution environment for this snap
+name: halftone
+base: core22
 adopt-info: halftone
-version: '0.2.0'
-grade: stable # must be 'stable' to release into candidate/stable channels
-confinement: strict # use 'strict' once you have the right plugs and slots
+compression: lzo
+grade: stable
+confinement: strict
 
-parts:     
+parts:  
+  libjxl:
+    source: https://github.com/libjxl/libjxl.git
+    source-tag: 'v0.10.2'
+    plugin: cmake
+    source-depth: 1
+    cmake-parameters:
+      - -DCMAKE_INSTALL_PREFIX=/usr
+      - -DBUILD_TESTING=OFF
+      - -DJPEGXL_ENABLE_BENCHMARK=OFF
+      - -DJPEGXL_ENABLE_DOXYGEN=OFF
+      - -DJPEGXL_ENABLE_EXAMPLES=OFF
+      - -DJPEGXL_ENABLE_JNI=OFF
+      - -DJPEGXL_ENABLE_JPEGLI_LIBJPEG=OFF
+      - -DJPEGXL_ENABLE_MANPAGES=OFF
+      - -DJPEGXL_ENABLE_PLUGINS=OFF
+      - -DJPEGXL_ENABLE_SJPEG=ON
+      - -DJPEGXL_ENABLE_SKCMS=ON
+      - -DJPEGXL_ENABLE_TOOLS=OFF
+      - -DJPEGXL_FORCE_SYSTEM_BROTLI=ON
+      - -DJPEGXL_WARNINGS_AS_ERRORS=OFF
+    prime:
+      - -usr/include
+      - -usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/pkgconfig
+      - -usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/cmake
+      - -usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/*.a
+      - -usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/*.la
+      - -usr/share
+
   magick:
+    after: [libjxl]
     plugin: autotools
     source: https://github.com/ImageMagick/ImageMagick.git
-    source-commit: "920f79206ff59f30a4cff22c9c9c393508b82663"
+    source-tag: '7.1.1-26'
+    build-packages:
+      - libjpeg-dev
+      - libopenjp2-7-dev
+      - libopenexr-dev
+      - libheif-dev
+      - liblcms2-dev
+      - liblqr-1-0-dev
+      - libraw-dev
+      - libwmf-dev
+      - libzip-dev
+      - libzstd-dev
+      - libraqm-dev
+    build-environment:
+      - LD_LIBRARY_PATH: $CRAFT_STAGE/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR:$LD_LIBRARY_PATH
+    source-depth: 1
     autotools-configure-parameters:
       - --prefix=/usr
       - --with-heic=yes
-      - --with-rsvg=yes 
-      - --with-modules=yes
-      - --enable-delegate-build=yes
-      - --with-png=yes
+      - --with-rsvg=yes
+      - --disable-docs
     prime:
-      - -usr/lib/pkgconfig
+      - -usr/lib/*/pkgconfig
+      - -usr/lib/*/*.la
+      - -usr/lib/*/*.a
       - -usr/include
-      - -usr/share
+    organize:
+      usr/etc: usr/share
+
   halftone:
     after: [ magick ]
-    # See 'snapcraft plugins'
     plugin: meson
     source: https://github.com/tfuxu/Halftone.git
-    source-tag: '0.3.0'
+    source-tag: '0.6.0'
+    source-depth: 1
     meson-parameters:
       - --prefix=/snap/halftone/current/usr
       - -Dbuildtype=release
-    override-pull: |
-      craftctl default
-      patch -p1 < $CRAFT_PROJECT_DIR/halftone.patch
-      pip install --prefix=$CRAFT_PART_INSTALL/usr Wand
-    build-packages:
-      - blueprint-compiler
-      - execstack
-    stage-packages:
-      - libjpeg62
+    build-snaps:
+      - blueprint-compiler 
     override-build: |
       craftctl default
-      mkdir -p $CRAFT_PART_INSTALL/meta/gui
-      cp -r $CRAFT_PART_INSTALL/snap/halftone/current/usr/share/icons $CRAFT_PART_INSTALL/meta/gui/
-      for i in `find $CRAFT_PART_INSTALL/meta/gui/icons -name "*.svg" -o -name "*.png"`; do
-        mv $i "`dirname $i`/snap.$CRAFT_PROJECT_NAME.`basename $i`"
-      done
-    override-prime: |
-      craftctl default
-      if [ "$CRAFT_ARCH_TRIPLET" = "arm-linux-gnueabihf" ]; then
-      execstack --clear-execstack usr/lib/arm-linux-gnueabihf/libde265.so.0.1.1
-      fi
+      sed -i '1c#!/usr/bin/env python3' $CRAFT_PART_INSTALL/snap/halftone/current/usr/bin/halftone
     parse-info: [usr/share/appdata/io.github.tfuxu.Halftone.appdata.xml]
     organize:
       snap/halftone/current: .
-      usr/local: usr
-      usr/lib/python3: usr/lib/python3.10
     prime:
       - -snap/halftone
+
+  deps:
+    after: [ halftone ]
+    plugin: python
+    source: .
+    python-packages:
+      - Wand==0.6.13
+    stage-packages:
+      - liblqr-1-0
+      - libraw20
+      - libopenexr25
+      - libheif1
+      - libjpeg62
+      - libwmf-0.2-7
+      - libzip4
+      - libzstd1
+      - libraqm0
+    prime:
+      - -bin
+      - -pyvenv.cfg
+      - -include
+      - -lib64
+      - -lib
+      - -usr/share/docs
+      - -usr/share/lintian
+      - -usr/share
+    organize:
+      lib/python3.10/site-packages: usr/lib/python3/dist-packages
+
+  cleanup:
+    after:
+    - deps
+    plugin: nil
+    build-snaps:  # List all content-snaps and base snaps you're using here
+      - core22
+      - gnome-42-2204
+    override-prime: |
+      set -eux
+      for snap in "core22" "gnome-42-2204"; do
+          cd "/snap/$snap/current" && find . -type f,l -exec rm -rf "$CRAFT_PRIME/{}" \;
+      done
+
 slots:
   halftone:
     interface: dbus
@@ -69,9 +139,10 @@ apps:
     common-id: io.github.tfuxu.Halftone
     extensions: [gnome]
     environment:
-      PYTHONPATH: $SNAP/usr/lib/python3.10/dist-packages:$PYTHONPATH
+      PYTHONPATH: $SNAP/usr/lib/python3/dist-packages:$PYTHONPATH
+      GDK_DEBUG: portals
+      MAGICK_CONFIGURE_PATH: $SNAP/usr/share/ImageMagick-7
       MAGICK_HOME: $SNAP/usr
-      MAGICK_CODER_MODULE_PATH: $SNAP/usr/lib/
     plugs:
       - home
     
