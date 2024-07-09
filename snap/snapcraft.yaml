@@ -1,5 +1,5 @@
 name: halftone
-base: core22
+base: core24
 adopt-info: halftone
 compression: lzo
 grade: stable
@@ -71,13 +71,13 @@ parts:
     after: [ magick ]
     plugin: meson
     source: https://github.com/tfuxu/Halftone.git
-    source-tag: '0.6.0'
+    source-tag: '0.6.1'
     source-depth: 1
     meson-parameters:
       - --prefix=/snap/halftone/current/usr
       - -Dbuildtype=release
     build-snaps:
-      - blueprint-compiler 
+      - blueprint-compiler/latest/edge 
     override-build: |
       craftctl default
       sed -i '1c#!/usr/bin/env python3' $CRAFT_PART_INSTALL/snap/halftone/current/usr/bin/halftone
@@ -95,12 +95,12 @@ parts:
       - Wand==0.6.13
     stage-packages:
       - liblqr-1-0
-      - libraw20
-      - libopenexr25
+      - libraw23t64
+      - libopenexr-3-1-30
       - libheif1
       - libjpeg62
-      - libwmf-0.2-7
-      - libzip4
+      - libwmf0.2-7
+      - libzip4t64
       - libzstd1
       - libraqm0
     prime:
@@ -109,22 +109,22 @@ parts:
       - -include
       - -lib64
       - -lib
-      - -usr/share/docs
-      - -usr/share/lintian
+      - -usr/lib/*/*/pip*
+      - -usr/lib/*/*/setup*
       - -usr/share
     organize:
-      lib/python3.10/site-packages: usr/lib/python3/dist-packages
+      lib/python3.12/site-packages: usr/lib/python3/dist-packages
 
   cleanup:
     after:
     - deps
     plugin: nil
     build-snaps:  # List all content-snaps and base snaps you're using here
-      - core22
-      - gnome-42-2204
+      - core24
+      - gnome-46-2404
     override-prime: |
       set -eux
-      for snap in "core22" "gnome-42-2204"; do
+      for snap in "core24" "gnome-46-2404"; do
           cd "/snap/$snap/current" && find . -type f,l -exec rm -rf "$CRAFT_PRIME/{}" \;
       done
 
@@ -133,6 +133,7 @@ slots:
     interface: dbus
     bus: session
     name: io.github.tfuxu.Halftone
+
 apps:
   halftone:
     command: usr/bin/halftone
