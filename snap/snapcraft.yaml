@@ -43,6 +43,7 @@ parts:
       - libjpeg-dev
       - libopenjp2-7-dev
       - libopenexr-dev
+      - libstdc++-14-dev
       - libheif-dev
       - liblcms2-dev
       - liblqr-1-0-dev
@@ -75,7 +76,7 @@ parts:
     source-depth: 1
     meson-parameters:
       - --prefix=/snap/halftone/current/usr
-      - -Dbuildtype=release
+      - -Dbuildtype=release 
     build-snaps:
       - blueprint-compiler/latest/edge 
     override-build: |
